@@ -114,11 +114,12 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
     function quakeStyle(feature){
       return {
         opacity: 1,
-        fillOpacity: 1,
+        fillOpacity: 0.5,
         fillColor: quakeColor(feature.geometry.coordinates[2]),
         color: "black",
         radius: quakeSize(feature.properties.mag),
-        weight: 0.5
+        weight: 0.5,
+        stroke: true
       }
     }
 
@@ -129,9 +130,13 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
         return L.circleMarker(latLng);
       },
       // set the style for each marker
-      style: quakeStyle, // calls the data style func and passes in earthquade data
+      style: quakeStyle, // calls the data style func and passes in earthquake data
       // add popups
-
+      onEachFeature: function(feature, layer){
+        layer.bindPopup(`Magnitude: <b>${feature.properties.mag}</b><br>)
+                        Depth: <b>${feature.geometry.coordinates[2]}</b><br>
+                        Location: <b>${feature.properties.place}</b>`);
+      }
     }).addTo(quakes);
   }
 );
