@@ -39,7 +39,7 @@ var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
 });
 
 // make basemabes object
-let basemaps = {
+var basemaps = {
   Topographic: topo,
   Terrain1: terrain1,
   Terrain2: terrain2,
@@ -63,24 +63,89 @@ var tectonic = new L.layerGroup();
 
 // call api to get tectonic plate data
 d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json")
-  .then(function(plateData){
-    //console.log(plateData);
+.then(function(plateData){
+  //console.log(plateData);
 
-    // load date w/ geojson and add to tectonic layer
-    L.geoJson(plateData,{
-      // add styling to make visible
-      color: "brown",
-      weight: 1
-    }).addTo(tectonic);
-  });
+  // load date w/ geojson and add to tectonic layer
+  L.geoJson(plateData,{
+    // add styling to make visible
+    color: "brown",
+    weight: 1
+  }).addTo(tectonic);
+});
 
-  // add tectonic plate layer to map
-  tectonic.addTo(myMap);
+// add tectonic plate layer to map
+tectonic.addTo(myMap);
 
-  // add the tectonic overlay
-  var overlays = {
-    "Tectonic Plates": tectonic
-  };
+// variable to hold the earthquakes data
+var quakes = new L.layerGroup();
+
+// create the data for the earthquakes and populate the layer group
+// call the USGS GeoJSON api
+d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson")
+.then(
+  function(quakeData){
+    console.log(quakeData);
+
+    // plot circles where radii are driven by quake magnitude, color by depth
+
+    // function to set color
+    function quakeColor(depth){
+      if (depth > 90)
+        return "red";
+      else if (depth > 70)
+        return "orangered";
+      else if (depth > 50)
+        return "orange";
+      else if (depth > 30)
+        return "#ffbf00";
+      else if (depth > 10)
+        return "yellow";
+      else
+        return "chartreuse";
+    }
+
+    // functin to set size (radius)
+    function quakeSize(mag){
+      return ((mag * 5) + 1);
+    }
+
+    // add on the styling for each data point
+    function quakeStyle(feature){
+      return {
+        opacity: 1,
+        fillOpacity: 1,
+        fillColor: quakeColor(feature.geometry.coordinates[2]),
+        color: "black",
+        radius: quakeSize(feature.properties.mag),
+        weight: 0.5
+      }
+    }
+
+    // add GeoJSON data to the earthquake layer group
+    L.geoJson(quakeData, {
+      // make each feature a marker that is on the map; each is a circle
+      pointToLayer: function(feature, latLng) {
+        return L.circleMarker(latLng);
+      },
+      // set the style for each marker
+      style: quakeStyle, // calls the data style func and passes in earthquade data
+      // add popups
+
+    }).addTo(quakes);
+  }
+);
+
+  
+// add earthquake layer to the map
+quakes.addTo(myMap);
+
+
+// add the tectonic overlay
+var overlays = {
+  "Tectonic Plates": tectonic,
+  "Earthquake Date": quakes
+};
 
 // add the layer control
 L.control
