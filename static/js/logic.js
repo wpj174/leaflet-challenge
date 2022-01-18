@@ -148,8 +148,8 @@ quakes.addTo(myMap);
 
 // add the tectonic overlay
 var overlays = {
-  "Tectonic Plates": tectonic,
-  "Earthquake Date": quakes
+  "Earthquake Data": quakes,
+  "Tectonic Plates": tectonic
 };
 
 // add the layer control
