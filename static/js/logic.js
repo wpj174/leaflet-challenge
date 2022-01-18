@@ -133,7 +133,7 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
       style: quakeStyle, // calls the data style func and passes in earthquake data
       // add popups
       onEachFeature: function(feature, layer){
-        layer.bindPopup(`Magnitude: <b>${feature.properties.mag}</b><br>)
+        layer.bindPopup(`Magnitude: <b>${feature.properties.mag}</b><br>
                         Depth: <b>${feature.geometry.coordinates[2]}</b><br>
                         Location: <b>${feature.properties.place}</b>`);
       }
@@ -156,4 +156,44 @@ var overlays = {
 L.control
   .layers(basemaps, overlays)
   .addTo(myMap);
+
+// add legend to map
+var legend = L.control({
+  position: "bottomright"
+});
+
+// add the properties for the legend
+legend.onAdd = function() {
+  // div for the legent to appear in
+  var div = L.DomUtil.create("div", "info legend");
+
+  // set up the intervals
+  var intervals = [-10, 10, 30, 50, 70, 90];
+  // set up the colors for the intervals
+  var colors = [
+    "chartreuse",
+    "yellow",
+    "#ffbf00",
+    "orange",
+    "orangered",
+    "red"
+  ];
+
+  // loop through the intervals and the colors to generate the labels
+  // with a colored square for each interval
+  for (var i = 0; i < intervals.length; i++)
+  {
+    // inner html that sets the square for each interval and label
+    div.innerHTML += "<i style='background: "
+      + colors[i]
+      + "'></i> "
+      + intervals[i]
+      + (intervals[i + 1] ? "km &mdash; " + intervals[i + 1] + "km<br>" : "km +");
+  }
+
+  return div;
+};
+
+// add legend to the map
+legend.addTo(myMap);
 
